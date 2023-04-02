@@ -6,21 +6,28 @@ void main() {
   runApp(const App());
 }
 
-enum States { initial, loading, loaded, error }
-
 class State {
-  States current;
-  State([this.current = States.initial]);
+  int count;
+  State([this.count = 0]);
+  get datetime {
+    var now = DateTime.now();
+    now = now.subtract(const Duration(hours: 6));
+    var datetime = now.year * 1000000 +
+        now.month * 10000 +
+        now.day * 100 +
+        now.hour ~/ 6 * 6;
+    return datetime;
+  }
 }
 
 class StateCubit extends Cubit<State> {
   StateCubit(super.initialState);
   download() {
-    state.current = States.loading;
-    emit(state);
+    emit(State(state.count + 1));
   }
 
-  get currstate => state.current;
+  get url =>
+      'https://meteo.pl/um/metco/mgram_pict.php?ntype=0u&fdate=${state.datetime}&row=409&col=248&lang=en';
 }
 
 class App extends StatelessWidget {
@@ -39,15 +46,16 @@ class App extends StatelessWidget {
 }
 
 buildContent(StateCubit c) => Center(
-      child: Column(
-        children: [
-          Image.network(
-              'https://docs.flutter.dev/assets/images/shared/brand/flutter/logo/flutter-lockup.png'),
-          Text("The state is now: ${c.currstate}"),
-          c.currstate == States.initial
-              ? button("Download...", () => c.download())
-              : Text("downloading..."),
-        ],
+      child: DraggableScrollableSheet(
+        initialChildSize: 1.0,
+        builder: (context, scrollController) => ListView(
+          controller: scrollController,
+          children: [
+            Text("Meteogram for${c.state.datetime}"),
+            Image.network(c.url),
+            button("Refresh", () => c.download()),
+          ],
+        ),
       ),
     );
 
