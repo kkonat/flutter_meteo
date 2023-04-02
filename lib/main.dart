@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart' as http;
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 
 const appName = "meteo";
 void main() {
@@ -58,14 +55,3 @@ button(txt, func) => ElevatedButton(
       onPressed: func,
       child: Text(txt),
     );
-
-Future<String> getImage(url) async {
-  var response = await http.get(Uri.parse(url));
-  var documentDirectory = await getApplicationDocumentsDirectory();
-  var firstPath = documentDirectory.path + "/images";
-  var filePathAndName = documentDirectory.path + '/images/pic.jpg';
-  await Directory(firstPath).create(recursive: true); // <-- 1
-  File file = new File(filePathAndName); // <-- 2
-  file.writeAsBytesSync(response.bodyBytes); // <-- 3
-  return filePathAndName;
-}
